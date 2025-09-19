@@ -7,7 +7,6 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import "./style.css"; // your CSS file
 
 export default function LoginRegisterPage() {
   const [isLogin, setIsLogin] = useState(true);

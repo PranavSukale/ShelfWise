@@ -1,86 +1,113 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { useState } from "react";
+import { auth } from "@/firebase/firebaseConfig";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useRouter } from "next/navigation";
+import "./style.css"; // your CSS file
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+export default function LoginRegisterPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const router = useRouter();
 
-export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [role, setRole] = useState<string>("Staff")
-  const [loading, setLoading] = useState(false)
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    localStorage.setItem("shelfwise:role", role)
-    setTimeout(() => {
-      setLoading(false)
-      router.push("/dashboard")
-    }, 700)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+      router.push("/dashboard");
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
 
   return (
-    <main className="min-h-dvh grid place-items-center bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-balance">Shelfwise</CardTitle>
-          <CardDescription className="text-pretty">
-            Sign in to manage your inventory. Minimal, fast, and professional.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="grid gap-4" onSubmit={onSubmit}>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                inputMode="email"
-                placeholder="you@store.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+    <div className="container">
+      {/* Curved Background */}
+      <div className="curved-shape"></div>
+      <div className="curved-shape2"></div>
+
+      {/* Form Box */}
+      <div className={`form-box ${isLogin ? "Login" : "Register"}`}>
+        <h2>{isLogin ? "Login" : "Register"}</h2>
+        <form onSubmit={handleSubmit}>
+          {!isLogin && (
+            <div className="input-box">
+              <input
+                type="text"
                 required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
+              <label>Username</label>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Role</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger aria-label="Select role">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Owner">Owner</SelectItem>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Staff">Staff</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" disabled={loading} className="mt-2">
-              {loading ? "Signing in..." : "Sign in"}
-            </Button>
-            <div className="text-xs text-muted-foreground text-center">Future options: Google, OTP</div>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
-  )
+          )}
+
+          <div className="input-box">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <label>Email</label>
+          </div>
+
+          <div className="input-box">
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <label>Password</label>
+          </div>
+
+          <div className="input-box">
+            <button className="btn" type="submit">
+              {isLogin ? "Login" : "Register"}
+            </button>
+          </div>
+
+          <div className="regi-link">
+            {isLogin ? (
+              <p>
+                Don’t have an account?{" "}
+                <a href="#" onClick={() => setIsLogin(false)}>
+                  Sign Up
+                </a>
+              </p>
+            ) : (
+              <p>
+                Already have an account?{" "}
+                <a href="#" onClick={() => setIsLogin(true)}>
+                  Sign In
+                </a>
+              </p>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Info Content */}
+      <div className={`info-content ${isLogin ? "Login" : "Register"}`}>
+        <h2>{isLogin ? "WELCOME BACK!" : "WELCOME!"}</h2>
+        <p>
+          {isLogin
+            ? "We are happy to have you with us again. If you need anything, we are here to help."
+            : "We’re delighted to have you here. If you need any assistance, feel free to reach out."}
+        </p>
+      </div>
+    </div>
+  );
 }
+
